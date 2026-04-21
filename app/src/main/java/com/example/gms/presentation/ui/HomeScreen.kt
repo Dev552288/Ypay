@@ -19,22 +19,27 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,75 +51,41 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gms.ActionItem
-import com.example.gms.AuthViewModel
-import com.example.gms.Transaction
+import com.example.gms.utils.ActionItem
+import com.example.gms.viewmodel.MainViewModel
+import com.example.gms.data.model.Transaction
+import com.example.gms.utils.Screen
 import com.example.gms.utils.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: AuthViewModel) {
-    var showScanner by remember { mutableStateOf(false) }
-    var paymentData by remember { mutableStateOf<String?>(null) } // Stores QR result
-    var amountToPay by remember { mutableStateOf("") }
-    var showPinScreen by remember { mutableStateOf(false) }
-    // Initial dummy data
-    var transactions by remember {
-        mutableStateOf(
-            listOf(
-                Transaction("Coffee Shop", "₹5.50", "Today, 10:30 AM"),
-                Transaction("Electricity Bill", "₹120.00", "Yesterday")
+fun HomeScreen(viewModel: MainViewModel) {
+    val currentTab by viewModel.currentTab.collectAsState()
+    val transactions by viewModel.transactions.collectAsState()
+    Scaffold(
+        bottomBar = {
+            GPayBottomNavigation(
+                currentScreen = currentTab,
+                onTabSelected = { tab -> viewModel.selectTab(tab) } // ← button click → ViewModel
             )
-        )
-    }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (currentTab) {
+                is Screen.Home -> MainDashboard(
+                    onScanClick = { viewModel.openScanner() },      // ← button click → ViewModel
+                    viewModel = viewModel,
+                    transactions = transactions
+                )
 
-    when {
-        // STEP 4: UPI PIN Screen
-        showPinScreen -> {
-            UpiPinScreen(
-                amount = amountToPay,
-                recipient = paymentData ?: "",
-                onPinSuccess = {
-                    val newTx = Transaction(paymentData!!, "₹$amountToPay", "Just now")
-                    transactions = listOf(newTx) + transactions
-                    // Reset everything to go home
-                    paymentData = null
-                    amountToPay = ""
-                    showPinScreen = false
-                },
-                onBack = { showPinScreen = false }
-            )
-        }
-
-        paymentData != null -> {
-            // Screen 3: Enter Amount
-            PaymentAmountScreen(
-                recipientInfo = paymentData!!,
-                onBack = { paymentData = null },
-                onProceed = { amount ->
-                    amountToPay = amount
-                    showPinScreen = true
-                }
-            )
-        }
-        // STEP 2: Scanner
-        showScanner -> {
-            // Screen 2: Scanner
-            QRScannerScreen(
-                onQrCodeScanned = { rawResult ->
-                    paymentData = Utils.extractUpiId(rawResult) // Store result and switch screen
-                    showScanner = false
-                },
-                onBack = { showScanner = false }
-            )
-        }
-        // STEP 1: Main Dashboard
-        else -> {
-            MainDashboard(
-                onScanClick = { showScanner = true }, // This "switches" the channel to Scanner
-                viewModel = viewModel,
-                transactions = transactions // Pass the state list here
-            )
+                is Screen.Offers -> PlaceholderScreen("Offers & Deals")
+                is Screen.Profile -> PlaceholderScreen("Check Profile")
+                else -> MainDashboard(
+                    onScanClick = { viewModel.openScanner() },
+                    viewModel = viewModel,
+                    transactions = transactions
+                )
+            }
         }
     }
 }
@@ -123,15 +94,57 @@ fun HomeScreen(viewModel: AuthViewModel) {
 @Composable
 fun MainDashboard(
     onScanClick: () -> Unit,
-    viewModel: AuthViewModel,
+    viewModel: MainViewModel,
     transactions: List<Transaction>
 ) {
     val context = LocalContext.current
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Y-Pay", fontWeight = FontWeight.Bold) },
+                title = {
+                    if (isSearchActive) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Search...", fontSize = 16.sp) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(Icons.Default.Close, contentDescription = "Clear")
+                                    }
+                                }
+                            }
+                        )
+                    } else {
+                        Text("Y-Pay", fontWeight = FontWeight.Bold)
+                    }
+                },
+                navigationIcon = {
+                    if (isSearchActive) {
+                        IconButton(onClick = {
+                            isSearchActive = false
+                            searchQuery = "" // Clear search on exit
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
                 actions = {
+                    if (!isSearchActive) {
+                        IconButton(onClick = { isSearchActive = true }) {
+                            Icon(Icons.Default.Search, contentDescription = "Search")
+                        }
+                    }
                     IconButton(onClick = { viewModel.resetAuth() }) {
                         Icon(Icons.Default.Logout, contentDescription = "Lock App")
                     }
@@ -146,7 +159,7 @@ fun MainDashboard(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Large Scan QR Button (The G-Pay Signature)
+            // 1. Large Scan QR Button (The Y-Pay Signature)
             Button(
                 onClick = onScanClick,
                 modifier = Modifier
@@ -169,7 +182,6 @@ fun MainDashboard(
                 ActionItem("Pay phone", Icons.Default.PhoneIphone, Color(0xFFE6F4EA)),
                 ActionItem("Bank transfer", Icons.Default.AccountBalance, Color(0xFFFCE8E6))
             )
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 modifier = Modifier.height(110.dp), // Increased slightly for text clearance
@@ -196,7 +208,10 @@ fun MainDashboard(
                                 .background(action.color, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(action.icon, contentDescription = null, tint = Color.Black)
+                            Icon(action.icon,
+                                contentDescription = null,
+                                tint = Color.Black
+                            )
                         }
                         Text(
                             text = action.title,
@@ -212,9 +227,11 @@ fun MainDashboard(
 
             // 3. Recent Activity Section
             // Recent Activity Section
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp)
+            ) {
                 Text("Recent activity", fontWeight = FontWeight.Bold)
 
                 Spacer(modifier = Modifier.height(16.dp))

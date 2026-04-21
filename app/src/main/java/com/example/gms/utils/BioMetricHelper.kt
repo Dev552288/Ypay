@@ -1,4 +1,4 @@
-package com.example.gms
+package com.example.gms.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi

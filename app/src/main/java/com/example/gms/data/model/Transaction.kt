@@ -1,4 +1,4 @@
-package com.example.gms
+package com.example.gms.data.model
 
 data class Transaction(
     val name: String,

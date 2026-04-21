@@ -65,9 +65,10 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
     }
 
     val hasPermission = remember {
-        ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) ==
+        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED
     }
+
     if (!hasPermission) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Camera Permission Required", color = Color.White)
@@ -134,7 +135,7 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Google Pay Style Overlay
+        // 2. Y Pay Style Overlay
         QRViewfinderOverlay(onBack)
     }
 }
@@ -170,7 +171,7 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
             // Clear the middle square (the viewfinder)
             drawRoundRect(
                 color = Color.Transparent,
-                topLeft = androidx.compose.ui.geometry.Offset(left, top),
+                topLeft = Offset(left, top),
                 size = androidx.compose.ui.geometry.Size(squareSize, squareSize),
                 blendMode = BlendMode.Clear
             )

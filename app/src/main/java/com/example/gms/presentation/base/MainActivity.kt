@@ -1,8 +1,7 @@
-package com.example.gms
+package com.example.gms.presentation.base
 
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -25,38 +24,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.FragmentActivity
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.rememberCameraPositionState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import com.example.gms.presentation.ui.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.gms.utils.AppNavGraph
+import com.example.gms.utils.BiometricHelper
+import com.example.gms.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity() {
     private lateinit var biometricHelper: BiometricHelper
-    private val viewModel = AuthViewModel()
+    private val viewModel = MainViewModel()
     override fun onStart() {
         super.onStart()
         viewModel.resetAuth()
     }
+
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         biometricHelper = BiometricHelper(this)
         setContent {
             val isAuthenticated by viewModel.isAuthenticated.collectAsState()
-            /*GMSTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MapScreen()
-                }
-            }*/
             // This block runs whenever isAuthenticated changes
             LaunchedEffect(isAuthenticated) {
                 if (!isAuthenticated) {
@@ -68,75 +60,60 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
-            if (isAuthenticated){
-                HomeScreen(viewModel)
-            }else {
+            if (isAuthenticated) {
+                AppNavGraph(
+                    navController = rememberNavController(),
+                    navViewModel = viewModel
+                )
+            } else {
                 PinScreen(viewModel)
             }
         }
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun MapScreen() {
-    val defaultPos = LatLng(1.35, 103.87)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(defaultPos, 10f)
-    }
-
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
-    )
-}
 
 @Composable
-fun PinScreen(viewModel: AuthViewModel) {
+fun PinScreen(viewModel: MainViewModel) {
     var pin by remember { mutableStateOf("") }
-    val isAuthenticated by viewModel.isAuthenticated.collectAsState()
     val errorMsg by viewModel.errorMessage.collectAsState() // collect error state
 
-    if (isAuthenticated) {
-        HomeScreen(viewModel)
-    } else {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            errorMsg?.let {
-                Text(text = it, color = Color.Red, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(10.dp))
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        errorMsg?.let {
+            Text(text = it, color = Color.Red, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+        Text("Enter PIN", fontSize = 22.sp)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "*".repeat(pin.length),
+            fontSize = 30.sp
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        NumericKeypad(
+            onNumberClick = {
+                if (pin.length < 4) pin += it
+            },
+            onDelete = {
+                if (pin.isNotEmpty()) pin = pin.dropLast(1)
             }
-            Text("Enter PIN", fontSize = 22.sp)
+        )
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = "*".repeat(pin.length),
-                fontSize = 30.sp
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            NumericKeypad(
-                onNumberClick = {
-                    if (pin.length < 4) pin += it
-                },
-                onDelete = {
-                    if (pin.isNotEmpty()) pin = pin.dropLast(1)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(onClick = {
-                viewModel.validatePin(pin)
-                pin = ""
-            }) {
-                Text("Verify")
-            }
+        Button(onClick = {
+            viewModel.validatePin(pin)
+            pin = ""
+        }) {
+            Text("Verify")
         }
     }
 }
@@ -152,7 +129,6 @@ fun NumericKeypad(
         listOf("7", "8", "9"),
         listOf("", "0", "⌫")
     )
-
     Column {
         numbers.forEach { row ->
             Row(
