@@ -93,4 +93,12 @@ class MainViewModel : ViewModel() {
     fun addTransaction(transaction: Transaction) {
         _transactions.value = listOf(transaction) + _transactions.value
     }
+
+    fun getCurrentData() : String {
+        val currentDate = java.text.SimpleDateFormat(
+            "dd MMM yyyy",
+            java.util.Locale.getDefault()
+        ).format(java.util.Date())
+        return currentDate
+    }
 }

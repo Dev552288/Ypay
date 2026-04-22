@@ -2,11 +2,6 @@ package com.example.gms.presentation.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -16,25 +11,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.gms.utils.Screen
 
 @Composable
-fun GPayBottomNavigation(
-    currentScreen: Screen,
-    onTabSelected: (Screen) -> Unit
+fun YPayBottomNavigation(
+    navController: NavHostController
 ) {
-    val items = listOf(Screen.Home, Screen.Offers, Screen.Profile)
+    val items = listOf(Screen.Home, Screen.Offers, Screen.Profile, Screen.History)
+
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
 
     androidx.compose.material3.NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp
     ) {
         items.forEach { screen ->
-           NavigationBarItem(
+            val selected = currentRoute == screen.route
+
+            NavigationBarItem(
                 icon = { Icon(screen.icon, contentDescription = screen.label) },
                 label = { Text(screen.label) },
-                selected = currentScreen == screen,
-                onClick = { onTabSelected(screen) },
+                selected = selected,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(Screen.Home.route) {
+                            saveState = true
+                        }
+                        launchSingleTop = true   // ✅ prevents duplicate screens
+                        restoreState = true
+                    }
+                },
                 colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
                     selectedIconColor = Color(0xFF1A73E8),
                     selectedTextColor = Color(0xFF1A73E8),

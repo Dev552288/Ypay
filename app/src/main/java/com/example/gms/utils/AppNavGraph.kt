@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.gms.data.model.Transaction
+import com.example.gms.presentation.ui.HistoryScreen
 import com.example.gms.presentation.ui.HomeScreen
 import com.example.gms.presentation.ui.PaymentAmountScreen
 import com.example.gms.presentation.ui.PlaceholderScreen
@@ -57,7 +58,8 @@ fun AppNavGraph(
         // ── Tab: Home
         composable(Screen.Home.route) {
             HomeScreen(
-                viewModel = navViewModel
+                viewModel = navViewModel,
+                navController
             )
         }
 
@@ -69,6 +71,15 @@ fun AppNavGraph(
         // ── Tab: Profile
         composable(Screen.Profile.route) {
             PlaceholderScreen(title = "Check Profile")
+        }
+
+        composable(Screen.History.route) {
+            val transactions by navViewModel.transactions.collectAsState()
+
+            HistoryScreen(
+                transactions = transactions,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         // ── Payment: Scanner
@@ -113,7 +124,13 @@ fun AppNavGraph(
                 recipient = recipient,
                 onPinSuccess = {
                     navViewModel.addTransaction(
-                        Transaction(recipient, "₹$amount", "Just now")
+                        Transaction(
+                            title = recipient,
+                            amount = "₹$amount",
+                            name = "Debendra Bharatia",
+                            time = navViewModel.getCurrentData(),
+                            date = navViewModel.getCurrentData()
+                        )
                     )
                     navViewModel.onPaymentSuccess()
                 },

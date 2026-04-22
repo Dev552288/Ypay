@@ -51,42 +51,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.gms.utils.ActionItem
 import com.example.gms.viewmodel.MainViewModel
 import com.example.gms.data.model.Transaction
 import com.example.gms.utils.Screen
-import com.example.gms.utils.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: MainViewModel) {
+fun HomeScreen(
+    viewModel: MainViewModel,
+    navController: NavHostController
+) {
     val currentTab by viewModel.currentTab.collectAsState()
     val transactions by viewModel.transactions.collectAsState()
     Scaffold(
         bottomBar = {
-            GPayBottomNavigation(
-                currentScreen = currentTab,
-                onTabSelected = { tab -> viewModel.selectTab(tab) } // ← button click → ViewModel
+            YPayBottomNavigation(
+                navController
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (currentTab) {
-                is Screen.Home -> MainDashboard(
-                    onScanClick = { viewModel.openScanner() },      // ← button click → ViewModel
-                    viewModel = viewModel,
-                    transactions = transactions
-                )
-
-                is Screen.Offers -> PlaceholderScreen("Offers & Deals")
-                is Screen.Profile -> PlaceholderScreen("Check Profile")
-                else -> MainDashboard(
-                    onScanClick = { viewModel.openScanner() },
-                    viewModel = viewModel,
-                    transactions = transactions
-                )
-            }
-        }
+        MainDashboard(
+            onScanClick = { viewModel.openScanner() },
+            viewModel = viewModel,
+            transactions = transactions
+        )
     }
 }
 
@@ -245,7 +235,7 @@ fun MainDashboard(
                     )
                 } else {
                     transactions.forEach { tx ->
-                        TransactionRow(tx.name, tx.amount, tx.date)
+                        TransactionRow(name = tx.name?:"", amount = tx.amount?:"", date = tx.date?:"")
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
