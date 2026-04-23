@@ -121,7 +121,7 @@ fun TransactionItemRow(tx: Transaction) {
             Text(tx.name?:"", fontWeight = FontWeight.Medium)
             Text(tx.date?:"", fontSize = 12.sp, color = Color.Gray)
         }
-
+        
         Text(
             text = tx.amount?:"",
             fontWeight = FontWeight.Bold,

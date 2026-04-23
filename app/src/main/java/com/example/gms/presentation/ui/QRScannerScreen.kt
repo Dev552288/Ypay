@@ -58,15 +58,16 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
+                context, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
 
     val hasPermission = remember {
-        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-                PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     if (!hasPermission) {
@@ -78,8 +79,7 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted -> hasCameraPermission = granted }
-    )
+        onResult = { granted -> hasCameraPermission = granted })
 
     LaunchedEffect(Unit) {
         launcher.launch(Manifest.permission.CAMERA)
@@ -110,8 +110,7 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
                         it.setSurfaceProvider(previewView.surfaceProvider)
                     }
                     val imageAnalysis = ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
                     val scanner = BarcodeScanning.getClient()
 
                     imageAnalysis.setAnalyzer(executor) { imageProxy ->
@@ -131,8 +130,7 @@ fun QRScannerScreen(onQrCodeScanned: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }, executor)
                 previewView
-            },
-            modifier = Modifier.fillMaxSize()
+            }, modifier = Modifier.fillMaxSize()
         )
 
         // 2. Y Pay Style Overlay
@@ -145,13 +143,9 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
     // Animation for the "Scanning" line
     val infiniteTransition = rememberInfiniteTransition(label = "scanning")
     val lineOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "linePosition"
+        initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
+        ), label = "linePosition"
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -164,7 +158,7 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
             val bottom = top + squareSize
             val cornerLength = 40.dp.toPx()
             val strokeWidth = 4.dp.toPx()
-            val gPayBlue = Color(0xFF1A73E8)
+            val yPayBlue = Color(0xFF1A73E8)
             // Draw background
             drawRect(color = Color.Black.copy(alpha = 0.6f))
 
@@ -178,45 +172,33 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
 
             // 3. Draw Blue Corners
             // Top Left
-            drawLine(gPayBlue, Offset(left, top), Offset(left + cornerLength, top), strokeWidth)
-            drawLine(gPayBlue, Offset(left, top), Offset(left, top + cornerLength), strokeWidth)
+            drawLine(yPayBlue, Offset(left, top), Offset(left + cornerLength, top), strokeWidth)
+            drawLine(yPayBlue, Offset(left, top), Offset(left, top + cornerLength), strokeWidth)
 
             // Top Right
-            drawLine(gPayBlue, Offset(right, top), Offset(right - cornerLength, top), strokeWidth)
-            drawLine(gPayBlue, Offset(right, top), Offset(right, top + cornerLength), strokeWidth)
+            drawLine(yPayBlue, Offset(right, top), Offset(right - cornerLength, top), strokeWidth)
+            drawLine(yPayBlue, Offset(right, top), Offset(right, top + cornerLength), strokeWidth)
 
             // Bottom Left
             drawLine(
-                gPayBlue,
-                Offset(left, bottom),
-                Offset(left + cornerLength, bottom),
-                strokeWidth
+                yPayBlue, Offset(left, bottom), Offset(left + cornerLength, bottom), strokeWidth
             )
             drawLine(
-                gPayBlue,
-                Offset(left, bottom),
-                Offset(left, bottom - cornerLength),
-                strokeWidth
+                yPayBlue, Offset(left, bottom), Offset(left, bottom - cornerLength), strokeWidth
             )
 
             // Bottom Right
             drawLine(
-                gPayBlue,
-                Offset(right, bottom),
-                Offset(right - cornerLength, bottom),
-                strokeWidth
+                yPayBlue, Offset(right, bottom), Offset(right - cornerLength, bottom), strokeWidth
             )
             drawLine(
-                gPayBlue,
-                Offset(right, bottom),
-                Offset(right, bottom - cornerLength),
-                strokeWidth
+                yPayBlue, Offset(right, bottom), Offset(right, bottom - cornerLength), strokeWidth
             )
 
             // 4. Moving Laser Line
             val lineY = top + (squareSize * lineOffset)
             drawLine(
-                color = gPayBlue.copy(alpha = 0.6f),
+                color = yPayBlue.copy(alpha = 0.6f),
                 start = Offset(left + 10.dp.toPx(), lineY),
                 end = Offset(right - 10.dp.toPx(), lineY),
                 strokeWidth = 2.dp.toPx()
@@ -225,13 +207,10 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
 
         // Back Button
         IconButton(
-            onClick = onBack,
-            modifier = Modifier.padding(top = 40.dp, start = 16.dp)
+            onClick = onBack, modifier = Modifier.padding(top = 40.dp, start = 16.dp)
         ) {
             Icon(
-                Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
+                Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White
             )
         }
 
@@ -248,19 +227,15 @@ fun QRViewfinderOverlay(onBack: () -> Unit) {
 
 @SuppressLint("UnsafeOptInUsageError")
 fun processImageProxy(
-    barcodeScanner: BarcodeScanner,
-    imageProxy: ImageProxy,
-    onQrCodeScanned: (String) -> Unit
+    barcodeScanner: BarcodeScanner, imageProxy: ImageProxy, onQrCodeScanned: (String) -> Unit
 ) {
     val inputImage =
         InputImage.fromMediaImage(imageProxy.image!!, imageProxy.imageInfo.rotationDegrees)
-    barcodeScanner.process(inputImage)
-        .addOnSuccessListener { barcodes ->
+    barcodeScanner.process(inputImage).addOnSuccessListener { barcodes ->
             barcodes.firstOrNull()?.rawValue?.let { qrCode ->
                 onQrCodeScanned(qrCode)
             }
-        }
-        .addOnCompleteListener {
+        }.addOnCompleteListener {
             imageProxy.close()
         }
 }
