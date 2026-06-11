@@ -14,6 +14,8 @@ activity = "1.9.3"
 constraintlayout = "2.2.1"
 mapsCompose = "4.3.0"
 playServicesMaps = "20.0.0"
+hilt = "2.48"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,8 +40,12 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
+hilt = { id = "dagger.hilt.android.plugin", version.ref = "hilt" }

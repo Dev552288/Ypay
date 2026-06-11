@@ -29,25 +29,42 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.example.gms.data.room.dao.TransactionDao
+import com.example.gms.data.room.database.AppDatabase
+import com.example.gms.data.room.repo.TransactionRepository
 import com.example.gms.utils.AppNavGraph
 import com.example.gms.utils.BiometricHelper
 import com.example.gms.viewmodel.MainViewModel
+import com.example.gms.viewmodel.MainViewModelFactory
 import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity() {
     private lateinit var biometricHelper: BiometricHelper
-    private val viewModel = MainViewModel()
+
+    private var viewModel : MainViewModel? = null
+
     override fun onStart() {
         super.onStart()
-        viewModel.resetAuth()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         biometricHelper = BiometricHelper(this)
+        // ROOM DATABASE
+        val database = AppDatabase.getDataBase(this)
+        // Dao
+        val transactionDao = database.transactionDao()
+        // REPOSITORY
+        val repository = TransactionRepository(transactionDao)
+        // FACTORY
+        val factory = MainViewModelFactory(repository)
+
         setContent {
+            val viewModel: MainViewModel = viewModel(factory = factory)
             val isAuthenticated by viewModel.isAuthenticated.collectAsState()
             // This block runs whenever isAuthenticated changes
             LaunchedEffect(isAuthenticated) {
@@ -60,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
+
             if (isAuthenticated) {
                 AppNavGraph(
                     navController = rememberNavController(),

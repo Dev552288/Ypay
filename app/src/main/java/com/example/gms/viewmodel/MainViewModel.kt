@@ -1,14 +1,24 @@
 package com.example.gms.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.gms.data.model.Transaction
+import com.example.gms.data.room.entity.TransactionEntity
+import com.example.gms.data.room.repo.TransactionRepository
 import com.example.gms.utils.NavigationEvent
 import com.example.gms.utils.Screen
+import com.example.gms.utils.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+
+class MainViewModel(private val repository: TransactionRepository) : ViewModel() {
     private val _isAuthenticated  = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
     // New state for the error message
@@ -22,9 +32,16 @@ class MainViewModel : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
 
-    // ── Transactions state (FIX — moved here from HomeScreen)
-    private val _transactions = MutableStateFlow<List<Transaction>>(emptyList())
-    val transactions: StateFlow<List<Transaction>> = _transactions.asStateFlow()
+    val transactions: StateFlow<List<Transaction>> =
+        repository.transactions
+            .map { list ->
+                list.map { it.toUi() }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
     fun validatePin(input : String){
         if (input == savePin) {
@@ -91,12 +108,24 @@ class MainViewModel : ViewModel() {
     }
 
     fun addTransaction(transaction: Transaction) {
-        _transactions.value = listOf(transaction) + _transactions.value
+        viewModelScope.launch {
+            repository.insert(
+                TransactionEntity(
+                    title = transaction.title,
+                    amount = transaction.amount,
+                    name = transaction.name,
+                    time = transaction.time,
+                    date = transaction.date
+                )
+            )
+
+            Log.d("ROOM_DB", "Transaction Inserted Successfully")
+        }
     }
 
     fun getCurrentData() : String {
         val currentDate = java.text.SimpleDateFormat(
-            "dd MMM yyyy",
+            "dd MMM yyyy hh:mm a",
             java.util.Locale.getDefault()
         ).format(java.util.Date())
         return currentDate

@@ -26,7 +26,7 @@ import java.net.URLDecoder
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    navViewModel: MainViewModel = viewModel()
+    navViewModel: MainViewModel
 ) {
     // ── Consume navigation events
     val event by navViewModel.navigationEvent.collectAsState()
@@ -77,7 +77,7 @@ fun AppNavGraph(
             val transactions by navViewModel.transactions.collectAsState()
 
             HistoryScreen(
-                transactions = transactions,
+                viewModel = navViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

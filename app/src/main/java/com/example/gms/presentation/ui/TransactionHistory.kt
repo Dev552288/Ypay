@@ -29,6 +29,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,13 +38,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gms.data.model.Transaction
+import com.example.gms.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    transactions: List<Transaction>,
+    viewModel: MainViewModel,
     onBack: () -> Unit
 ) {
+    val transactions by viewModel.transactions.collectAsState()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -121,7 +126,7 @@ fun TransactionItemRow(tx: Transaction) {
             Text(tx.name?:"", fontWeight = FontWeight.Medium)
             Text(tx.date?:"", fontSize = 12.sp, color = Color.Gray)
         }
-        
+
         Text(
             text = tx.amount?:"",
             fontWeight = FontWeight.Bold,
