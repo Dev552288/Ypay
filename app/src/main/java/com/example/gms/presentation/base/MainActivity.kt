@@ -35,6 +35,7 @@ import androidx.room.Room
 import com.example.gms.data.room.dao.TransactionDao
 import com.example.gms.data.room.database.AppDatabase
 import com.example.gms.data.room.repo.TransactionRepository
+import com.example.gms.presentation.ui.PinScreen
 import com.example.gms.utils.AppNavGraph
 import com.example.gms.utils.BiometricHelper
 import com.example.gms.viewmodel.MainViewModel
@@ -85,90 +86,6 @@ class MainActivity : AppCompatActivity() {
                 )
             } else {
                 PinScreen(viewModel)
-            }
-        }
-    }
-}
-
-
-@Composable
-fun PinScreen(viewModel: MainViewModel) {
-    var pin by remember { mutableStateOf("") }
-    val errorMsg by viewModel.errorMessage.collectAsState() // collect error state
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        errorMsg?.let {
-            Text(text = it, color = Color.Red, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-        Text("Enter PIN", fontSize = 22.sp)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "*".repeat(pin.length),
-            fontSize = 30.sp
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        NumericKeypad(
-            onNumberClick = {
-                if (pin.length < 4) pin += it
-            },
-            onDelete = {
-                if (pin.isNotEmpty()) pin = pin.dropLast(1)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(onClick = {
-            viewModel.validatePin(pin)
-            pin = ""
-        }) {
-            Text("Verify")
-        }
-    }
-}
-
-@Composable
-fun NumericKeypad(
-    onNumberClick: (String) -> Unit,
-    onDelete: () -> Unit
-) {
-    val numbers = listOf(
-        listOf("1", "2", "3"),
-        listOf("4", "5", "6"),
-        listOf("7", "8", "9"),
-        listOf("", "0", "⌫")
-    )
-    Column {
-        numbers.forEach { row ->
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                row.forEach { item ->
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clickable {
-                                when (item) {
-                                    "⌫" -> onDelete()
-                                    "" -> {}
-                                    else -> onNumberClick(item)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(item, fontSize = 24.sp)
-                    }
-                }
             }
         }
     }
