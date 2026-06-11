@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gms"
+    namespace = "com.example.ypay"
     compileSdk = 35
 
     defaultConfig {
