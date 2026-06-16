@@ -14,4 +14,15 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions ORDER BY id DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAllTransactions()
+
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteTransactionById(id: Long)
+
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    suspend fun getTransactionById(id: Long): TransactionEntity?
+
+
 }

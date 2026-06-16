@@ -118,7 +118,6 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
                     date = transaction.date
                 )
             )
-
             Log.d("ROOM_DB", "Transaction Inserted Successfully")
         }
     }
@@ -130,4 +129,5 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
         ).format(java.util.Date())
         return currentDate
     }
+
 }
