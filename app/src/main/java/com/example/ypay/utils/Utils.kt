@@ -10,4 +10,12 @@ object Utils {
             qrContent // If it's just plain text, return as is
         }
     }
+
+    fun getCurrentData() : String {
+        val currentDate = java.text.SimpleDateFormat(
+            "dd MMM yyyy hh:mm a",
+            java.util.Locale.getDefault()
+        ).format(java.util.Date())
+        return currentDate
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.ypay.presentation.base
 
+import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -8,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.ypay.data.room.database.AppDatabase
 import com.example.ypay.data.room.repo.TransactionRepository
+import com.example.ypay.presentation.service.NotificationService
 import com.example.ypay.presentation.ui.PinScreen
 import com.example.ypay.utils.AppNavGraph
 import com.example.ypay.utils.BiometricHelper
@@ -41,7 +45,15 @@ class MainActivity : AppCompatActivity() {
         // FACTORY
         val factory = MainViewModelFactory(repository)
 
+        //ask notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS),200)
+        }
+
         setContent {
+            // start foreground service
+            startForegroundService(Intent(this, NotificationService::class.java))
+
             val viewModel: MainViewModel = viewModel(factory = factory)
             val isAuthenticated by viewModel.isAuthenticated.collectAsState()
             // This block runs whenever isAuthenticated changes

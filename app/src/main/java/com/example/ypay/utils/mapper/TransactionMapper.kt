@@ -6,7 +6,7 @@ import com.example.ypay.data.room.entity.TransactionEntity
 
 fun TransactionEntity.toUi(): Transaction {
     return Transaction(
-        title = title,
+        qrCode = qrcode,
         amount = amount,
         name = name,
         time = time,

@@ -6,7 +6,7 @@ import com.example.ypay.data.room.entity.TransactionEntity
 class TransactionRepository(private val dao: TransactionDao) {
     val transactions = dao.getAllTransactions()
 
-    suspend fun insert(transaction: TransactionEntity){
-        dao.insertTransaction(transaction)
+    suspend fun insertTxnData(transaction: TransactionEntity){
+        dao.insertTxnData(transaction)
     }
 }

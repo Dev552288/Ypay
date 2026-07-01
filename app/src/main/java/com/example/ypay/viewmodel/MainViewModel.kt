@@ -109,9 +109,9 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
 
     fun addTransaction(transaction: Transaction) {
         viewModelScope.launch {
-            repository.insert(
+            repository.insertTxnData(
                 TransactionEntity(
-                    title = transaction.title,
+                    qrcode = transaction.qrCode,
                     amount = transaction.amount,
                     name = transaction.name,
                     time = transaction.time,
@@ -120,14 +120,6 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
             )
             Log.d("ROOM_DB", "Transaction Inserted Successfully")
         }
-    }
-
-    fun getCurrentData() : String {
-        val currentDate = java.text.SimpleDateFormat(
-            "dd MMM yyyy hh:mm a",
-            java.util.Locale.getDefault()
-        ).format(java.util.Date())
-        return currentDate
     }
 
 }

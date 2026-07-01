@@ -41,4 +41,7 @@ class BiometricHelper(private val activity: FragmentActivity) {
 
         biometricPrompt.authenticate(promptInfo)
     }
+
+
+
 }

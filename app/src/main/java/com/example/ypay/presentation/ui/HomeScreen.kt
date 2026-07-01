@@ -159,7 +159,7 @@ fun MainDashboard(
             ) {
                 Icon(Icons.Default.QrCodeScanner, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Scan any QR code", fontSize = 16.sp)
+                Text("Scan QR", fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

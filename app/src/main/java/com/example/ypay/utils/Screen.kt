@@ -33,9 +33,4 @@ sealed class Screen(
                 )
             }"
     }
-
-    companion object {
-        /** Drives GPayBottomNavigation — your existing 3 tabs */
-        val bottomNavItems: List<Screen> = listOf(Home, Offers, Profile)
-    }
 }

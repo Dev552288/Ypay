@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTransaction(transaction: TransactionEntity)
+    suspend fun insertTxnData(transaction: TransactionEntity)
 
     @Query("SELECT * FROM transactions ORDER BY id DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>

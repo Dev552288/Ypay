@@ -14,6 +14,7 @@ import com.example.ypay.presentation.ui.HistoryScreen
 import com.example.ypay.presentation.ui.HomeScreen
 import com.example.ypay.presentation.ui.PaymentAmountScreen
 import com.example.ypay.presentation.ui.PlaceholderScreen
+import com.example.ypay.presentation.ui.ProfileScreen
 import com.example.ypay.presentation.ui.QRScannerScreen
 import com.example.ypay.presentation.ui.UpiPinScreen
 import com.example.ypay.viewmodel.MainViewModel
@@ -66,7 +67,7 @@ fun AppNavGraph(
 
         // ── Tab: Profile
         composable(Screen.Profile.route) {
-            PlaceholderScreen(title = "Check Profile")
+            ProfileScreen()
         }
 
         composable(Screen.History.route) {
@@ -121,11 +122,11 @@ fun AppNavGraph(
                 onPinSuccess = {
                     navViewModel.addTransaction(
                         Transaction(
-                            title = recipient,
+                            qrCode = recipient,
                             amount = "₹$amount",
                             name = "Debendra Bharatia",
-                            time = navViewModel.getCurrentData(),
-                            date = navViewModel.getCurrentData()
+                            time = Utils.getCurrentData(),
+                            date = Utils.getCurrentData()
                         )
                     )
                     navViewModel.onPaymentSuccess()
